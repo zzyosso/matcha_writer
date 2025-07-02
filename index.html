@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>抹茶写作助手</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: "Helvetica Neue", sans-serif;
+      background: linear-gradient(135deg, #d4e9d7, #f2fdf2);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      color: #2f4f2f;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      padding: 10px;
+      gap: 10px;
+    }
+    .tab-bar {
+      display: flex;
+      justify-content: space-around;
+      background-color: rgba(200, 255, 200, 0.3);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .tab {
+      flex: 1;
+      padding: 12px;
+      text-align: center;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .tab.active {
+      background-color: rgba(144, 238, 144, 0.5);
+      border-radius: 10px;
+    }
+    .panel {
+      flex: 1;
+      overflow-y: auto;
+      background: rgba(255, 255, 255, 0.4);
+      border-radius: 12px;
+      padding: 10px;
+    }
+    textarea, input, select {
+      width: 100%;
+      padding: 8px;
+      margin: 6px 0;
+      border: none;
+      border-radius: 6px;
+      background-color: rgba(255, 255, 255, 0.8);
+      resize: vertical;
+    }
+    button {
+      margin-top: 10px;
+      padding: 10px;
+      width: 100%;
+      background-color: #88c999;
+      color: white;
+      font-weight: bold;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="tab-bar">
+      <div class="tab active" onclick="switchTab('outline')">大纲</div>
+      <div class="tab" onclick="switchTab('writing')">码字</div>
+      <div class="tab" onclick="switchTab('character')">人设</div>
+      <div class="tab" onclick="switchTab('structure')">章节</div>
+    </div>
+    <div class="panel" id="outline">
+      <textarea id="outlineText" rows="12" placeholder="在这里填写你的世界观、设定和故事大纲……" oninput="autosave()"></textarea>
+    </div>
+    <div class="panel" id="writing" style="display:none;">
+      <textarea id="mainText" rows="16" placeholder="开始码字吧！" oninput="autosave()"></textarea>
+      <button onclick="exportText()">导出文本</button>
+    </div>
+    <div class="panel" id="character" style="display:none;">
+      <textarea id="characterText" rows="12" placeholder="填写角色设定，比如姓名、性格、背景等……" oninput="autosave()"></textarea>
+    </div>
+    <div class="panel" id="structure" style="display:none;">
+      <input id="volumeName" placeholder="卷名，如：第一卷 命运之始" oninput="autosave()" />
+      <input id="chapterName" placeholder="章节名，如：第1章 初遇" oninput="autosave()" />
+    </div>
+  </div>
+
+  <script>
+    function switchTab(tabId) {
+      document.querySelectorAll('.panel').forEach(p => p.style.display = 'none')
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'))
+      document.getElementById(tabId).style.display = 'block'
+      event.target.classList.add('active')
+    }
+
+    function autosave() {
+      localStorage.setItem('outlineText', document.getElementById('outlineText').value)
+      localStorage.setItem('mainText', document.getElementById('mainText').value)
+      localStorage.setItem('characterText', document.getElementById('characterText').value)
+      localStorage.setItem('volumeName', document.getElementById('volumeName').value)
+      localStorage.setItem('chapterName', document.getElementById('chapterName').value)
+    }
+
+    function restore() {
+      document.getElementById('outlineText').value = localStorage.getItem('outlineText') || ''
+      document.getElementById('mainText').value = localStorage.getItem('mainText') || ''
+      document.getElementById('characterText').value = localStorage.getItem('characterText') || ''
+      document.getElementById('volumeName').value = localStorage.getItem('volumeName') || ''
+      document.getElementById('chapterName').value = localStorage.getItem('chapterName') || ''
+    }
+
+    function exportText() {
+      const volume = document.getElementById('volumeName').value || '未命名卷'
+      const chapter = document.getElementById('chapterName').value || '未命名章节'
+      const content = `【卷名】${volume}\n【章节】${chapter}\n\n${document.getElementById('mainText').value}`
+      const blob = new Blob([content], {type: "text/plain"})
+      const link = document.createElement("a")
+      link.download = `${volume}_${chapter}.txt`
+      link.href = URL.createObjectURL(blob)
+      link.click()
+    }
+
+    restore()
+  </script>
+</body>
+</html>
