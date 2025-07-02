@@ -2,24 +2,30 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
   <title>抹茶写作助手</title>
   <style>
-    body {
+    html, body {
       margin: 0;
-      font-family: "Helvetica Neue", sans-serif;
+      padding: 0;
+      height: 100dvh;
+      font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
       background: linear-gradient(135deg, #d4e9d7, #f2fdf2);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
       color: #2f4f2f;
-    }
-    .container {
       display: flex;
       flex-direction: column;
-      height: 100vh;
-      padding: 10px;
-      gap: 10px;
     }
+
+    .container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 8px;
+      gap: 8px;
+    }
+
     .tab-bar {
       display: flex;
       justify-content: space-around;
@@ -27,43 +33,61 @@
       border-radius: 10px;
       overflow: hidden;
     }
+
     .tab {
       flex: 1;
-      padding: 12px;
+      padding: 12px 0;
       text-align: center;
-      cursor: pointer;
       font-weight: bold;
+      cursor: pointer;
+      font-size: 16px;
     }
+
     .tab.active {
       background-color: rgba(144, 238, 144, 0.5);
       border-radius: 10px;
     }
+
     .panel {
       flex: 1;
+      display: none;
+      flex-direction: column;
       overflow-y: auto;
       background: rgba(255, 255, 255, 0.4);
       border-radius: 12px;
       padding: 10px;
     }
-    textarea, input, select {
+
+    .panel.active {
+      display: flex;
+    }
+
+    textarea, input {
       width: 100%;
-      padding: 8px;
+      padding: 10px;
       margin: 6px 0;
       border: none;
-      border-radius: 6px;
-      background-color: rgba(255, 255, 255, 0.8);
+      border-radius: 8px;
+      background-color: rgba(255, 255, 255, 0.85);
       resize: vertical;
+      font-size: 16px;
+      min-height: 120px;
     }
+
+    input {
+      min-height: 42px;
+    }
+
     button {
-      margin-top: 10px;
-      padding: 10px;
+      margin-top: auto;
+      padding: 12px;
       width: 100%;
       background-color: #88c999;
       color: white;
       font-weight: bold;
       border: none;
-      border-radius: 6px;
-      cursor: pointer;
+      border-radius: 8px;
+      font-size: 16px;
     }
   </style>
 </head>
@@ -75,17 +99,21 @@
       <div class="tab" onclick="switchTab('character')">人设</div>
       <div class="tab" onclick="switchTab('structure')">章节</div>
     </div>
-    <div class="panel" id="outline">
-      <textarea id="outlineText" rows="12" placeholder="在这里填写你的世界观、设定和故事大纲……" oninput="autosave()"></textarea>
+
+    <div class="panel active" id="outline">
+      <textarea id="outlineText" placeholder="在这里填写你的世界观、设定和故事大纲……" oninput="autosave()"></textarea>
     </div>
-    <div class="panel" id="writing" style="display:none;">
-      <textarea id="mainText" rows="16" placeholder="开始码字吧！" oninput="autosave()"></textarea>
+
+    <div class="panel" id="writing">
+      <textarea id="mainText" placeholder="开始码字吧！" oninput="autosave()"></textarea>
       <button onclick="exportText()">导出文本</button>
     </div>
-    <div class="panel" id="character" style="display:none;">
-      <textarea id="characterText" rows="12" placeholder="填写角色设定，比如姓名、性格、背景等……" oninput="autosave()"></textarea>
+
+    <div class="panel" id="character">
+      <textarea id="characterText" placeholder="填写角色设定，比如姓名、性格、背景等……" oninput="autosave()"></textarea>
     </div>
-    <div class="panel" id="structure" style="display:none;">
+
+    <div class="panel" id="structure">
       <input id="volumeName" placeholder="卷名，如：第一卷 命运之始" oninput="autosave()" />
       <input id="chapterName" placeholder="章节名，如：第1章 初遇" oninput="autosave()" />
     </div>
@@ -93,9 +121,9 @@
 
   <script>
     function switchTab(tabId) {
-      document.querySelectorAll('.panel').forEach(p => p.style.display = 'none')
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'))
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'))
-      document.getElementById(tabId).style.display = 'block'
+      document.getElementById(tabId).classList.add('active')
       event.target.classList.add('active')
     }
 
