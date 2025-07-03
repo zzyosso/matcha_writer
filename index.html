@@ -12,11 +12,14 @@
     }
 
     html, body {
+      height: 100vh;
       height: 100dvh;
       font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
       background: linear-gradient(135deg, #d4e9d7, #f2fdf2);
       color: #2f4f2f;
       overflow: hidden;
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
     }
 
     .book-container {
@@ -26,14 +29,15 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 20px;
+      padding: 10px;
       perspective: 1000px;
     }
 
     .book {
       position: relative;
-      width: min(90vw, 600px);
-      height: min(85vh, 800px);
+      width: min(95vw, 600px);
+      height: min(90vh, 800px);
+      max-height: calc(100vh - 20px);
       background: #fefefe;
       border-radius: 0 15px 15px 0;
       box-shadow: 
@@ -150,12 +154,12 @@
     /* 彩虹色标签 */
     .bookmarks {
       position: absolute;
-      right: -25px;
-      top: 50px;
+      right: -20px;
+      top: 40px;
       z-index: 10;
       display: flex;
       flex-direction: column;
-      gap: 5px;
+      gap: 3px;
       opacity: 0;
       transform: translateX(20px);
       transition: all 0.5s ease 0.8s;
@@ -167,18 +171,18 @@
     }
 
     .bookmark {
-      width: 50px;
-      height: 80px;
-      border-radius: 0 8px 8px 0;
+      width: 40px;
+      height: 60px;
+      border-radius: 0 6px 6px 0;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       color: white;
-      font-size: 12px;
+      font-size: 10px;
       font-weight: bold;
       text-align: center;
-      line-height: 1.2;
+      line-height: 1.1;
       transition: all 0.3s ease;
       box-shadow: 2px 2px 8px rgba(0,0,0,0.2);
       writing-mode: vertical-lr;
@@ -212,13 +216,13 @@
     }
 
     .bookmark.active {
-      transform: translateX(-10px);
+      transform: translateX(-8px);
       box-shadow: 2px 2px 15px rgba(0,0,0,0.3);
       filter: brightness(1.1) saturate(1.2);
     }
 
     .bookmark:hover {
-      transform: translateX(-5px);
+      transform: translateX(-4px);
       box-shadow: 2px 2px 12px rgba(0,0,0,0.25);
       filter: brightness(1.05);
     }
@@ -242,7 +246,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      padding: 30px;
+      padding: 20px;
       background: #fefefe;
       opacity: 0;
       transform: translateX(100%);
@@ -250,6 +254,7 @@
       overflow-y: auto;
       display: flex;
       flex-direction: column;
+      -webkit-overflow-scrolling: touch;
     }
 
     .page.active {
@@ -358,52 +363,89 @@
     /* 移动设备优化 */
     @media (max-width: 768px) {
       .book-container {
-        padding: 10px;
+        padding: 5px;
       }
 
       .book {
-        width: 95vw;
-        height: 90vh;
+        width: 100vw;
+        height: 100vh;
+        max-height: 100vh;
+        border-radius: 0;
+      }
+
+      .book-cover {
+        border-radius: 0;
       }
 
       .cover-title {
-        font-size: 28px;
+        font-size: 26px;
       }
 
       .cover-subtitle {
-        font-size: 16px;
+        font-size: 15px;
       }
 
       .cover-icon {
-        font-size: 60px;
+        font-size: 55px;
+      }
+
+      .cover-hint {
+        bottom: 20px;
+        right: 20px;
+        font-size: 14px;
       }
 
       .bookmarks {
-        right: -20px;
+        right: -15px;
         top: 30px;
+        gap: 2px;
       }
 
       .bookmark {
-        width: 40px;
-        height: 60px;
-        font-size: 10px;
+        width: 30px;
+        height: 50px;
+        font-size: 8px;
+        border-radius: 0 4px 4px 0;
+      }
+
+      .bookmark.active {
+        transform: translateX(-6px);
+      }
+
+      .bookmark:hover {
+        transform: translateX(-3px);
       }
 
       .page {
-        padding: 20px;
+        padding: 15px;
+        padding-bottom: 60px;
       }
 
       .page-title {
-        font-size: 20px;
+        font-size: 18px;
+        margin-bottom: 15px;
       }
 
       textarea, input {
-        padding: 12px;
+        padding: 10px;
         font-size: 16px;
+        border-radius: 6px;
       }
 
       textarea {
-        min-height: 120px;
+        min-height: 100px;
+      }
+
+      .export-btn {
+        padding: 12px 24px;
+        font-size: 14px;
+        margin-top: 15px;
+      }
+
+      .page-number {
+        bottom: 10px;
+        right: 15px;
+        font-size: 12px;
       }
     }
 
@@ -419,35 +461,151 @@
       }
 
       .cover-title {
-        font-size: 24px;
+        font-size: 22px;
       }
 
       .cover-subtitle {
-        font-size: 14px;
+        font-size: 13px;
       }
 
       .cover-icon {
-        font-size: 50px;
+        font-size: 45px;
+      }
+
+      .cover-hint {
+        bottom: 15px;
+        right: 15px;
+        font-size: 12px;
       }
 
       .bookmarks {
-        right: -15px;
+        right: -12px;
         top: 20px;
+        gap: 1px;
       }
 
       .bookmark {
-        width: 35px;
-        height: 50px;
-        font-size: 9px;
+        width: 25px;
+        height: 40px;
+        font-size: 7px;
+        border-radius: 0 3px 3px 0;
+      }
+
+      .bookmark.active {
+        transform: translateX(-5px);
+      }
+
+      .bookmark:hover {
+        transform: translateX(-2px);
       }
 
       .page {
-        padding: 15px;
+        padding: 10px;
+        padding-bottom: 50px;
       }
 
       .page-title {
-        font-size: 18px;
-        margin-bottom: 15px;
+        font-size: 16px;
+        margin-bottom: 10px;
+      }
+
+      textarea, input {
+        padding: 8px;
+        font-size: 16px;
+      }
+
+      textarea {
+        min-height: 80px;
+      }
+
+      .export-btn {
+        padding: 10px 20px;
+        font-size: 13px;
+        margin-top: 10px;
+      }
+
+      .page-number {
+        bottom: 8px;
+        right: 10px;
+        font-size: 11px;
+      }
+    }
+
+    /* 针对小屏幕手机的额外优化 */
+    @media (max-width: 320px) {
+      .cover-title {
+        font-size: 20px;
+      }
+
+      .cover-subtitle {
+        font-size: 12px;
+      }
+
+      .cover-icon {
+        font-size: 40px;
+      }
+
+      .bookmarks {
+        right: -10px;
+        top: 15px;
+      }
+
+      .bookmark {
+        width: 20px;
+        height: 35px;
+        font-size: 6px;
+      }
+
+      .page {
+        padding: 8px;
+        padding-bottom: 40px;
+      }
+
+      .page-title {
+        font-size: 14px;
+        margin-bottom: 8px;
+      }
+    }
+
+    /* 横屏模式优化 */
+    @media (max-width: 768px) and (orientation: landscape) {
+      .book {
+        height: 100vh;
+        max-height: 100vh;
+      }
+
+      .cover-icon {
+        font-size: 40px;
+        margin-bottom: 10px;
+      }
+
+      .cover-title {
+        font-size: 20px;
+      }
+
+      .cover-subtitle {
+        font-size: 12px;
+        margin-bottom: 20px;
+      }
+
+      .bookmarks {
+        top: 20px;
+        gap: 1px;
+      }
+
+      .bookmark {
+        width: 25px;
+        height: 35px;
+        font-size: 7px;
+      }
+
+      .page {
+        padding: 10px;
+        padding-bottom: 30px;
+      }
+
+      textarea {
+        min-height: 60px;
       }
     }
   </style>
