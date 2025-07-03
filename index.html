@@ -5,156 +5,740 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
   <title>抹茶写作助手</title>
   <style>
-    html, body {
+    * {
       margin: 0;
       padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
       height: 100dvh;
       font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
       background: linear-gradient(135deg, #d4e9d7, #f2fdf2);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
       color: #2f4f2f;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .container {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      padding: 8px;
-      gap: 8px;
-    }
-
-    .tab-bar {
-      display: flex;
-      justify-content: space-around;
-      background-color: rgba(200, 255, 200, 0.3);
-      border-radius: 10px;
       overflow: hidden;
     }
 
-    .tab {
-      flex: 1;
-      padding: 12px 0;
-      text-align: center;
-      font-weight: bold;
-      cursor: pointer;
-      font-size: 16px;
-    }
-
-    .tab.active {
-      background-color: rgba(144, 238, 144, 0.5);
-      border-radius: 10px;
-    }
-
-    .panel {
-      flex: 1;
-      display: none;
-      flex-direction: column;
-      overflow-y: auto;
-      background: rgba(255, 255, 255, 0.4);
-      border-radius: 12px;
-      padding: 10px;
-    }
-
-    .panel.active {
+    .book-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
       display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      perspective: 1000px;
+    }
+
+    .book {
+      position: relative;
+      width: min(90vw, 600px);
+      height: min(85vh, 800px);
+      background: #fefefe;
+      border-radius: 0 15px 15px 0;
+      box-shadow: 
+        0 0 30px rgba(0,0,0,0.1),
+        -5px 0 15px rgba(0,0,0,0.05);
+      overflow: hidden;
+      transform-style: preserve-3d;
+      transition: transform 0.3s ease;
+    }
+
+    .book::before {
+      content: '';
+      position: absolute;
+      left: -8px;
+      top: 0;
+      width: 8px;
+      height: 100%;
+      background: linear-gradient(to right, #c8e6c9, #e8f5e8);
+      border-radius: 0 0 0 15px;
+    }
+
+    .book-spine {
+      position: absolute;
+      left: -15px;
+      top: 0;
+      width: 15px;
+      height: 100%;
+      background: linear-gradient(to bottom, #88c999, #66b377);
+      border-radius: 15px 0 0 15px;
+      box-shadow: -2px 0 10px rgba(0,0,0,0.2);
+    }
+
+    /* 封面样式 */
+    .book-cover {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #88c999, #66b377);
+      border-radius: 0 15px 15px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 20;
+      transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+      transform-origin: left center;
+    }
+
+    .book-cover.opened {
+      transform: rotateY(-180deg);
+      pointer-events: none;
+      opacity: 0;
+    }
+
+    .cover-decoration {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(circle at 20% 20%, rgba(255,255,255,0.3) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(255,255,255,0.2) 0%, transparent 50%);
+      border-radius: 0 15px 15px 0;
+    }
+
+    .cover-content {
+      text-align: center;
+      color: white;
+      z-index: 2;
+    }
+
+    .cover-icon {
+      font-size: 80px;
+      margin-bottom: 20px;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    .cover-title {
+      font-size: 32px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .cover-subtitle {
+      font-size: 18px;
+      opacity: 0.9;
+      margin-bottom: 40px;
+    }
+
+    .cover-hint {
+      position: absolute;
+      bottom: 30px;
+      right: 30px;
+      font-size: 16px;
+      opacity: 0.8;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.8; }
+      50% { opacity: 1; }
+    }
+
+    /* 彩虹色标签 */
+    .bookmarks {
+      position: absolute;
+      right: -25px;
+      top: 50px;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      opacity: 0;
+      transform: translateX(20px);
+      transition: all 0.5s ease 0.8s;
+    }
+
+    .bookmarks.visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .bookmark {
+      width: 50px;
+      height: 80px;
+      border-radius: 0 8px 8px 0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 12px;
+      font-weight: bold;
+      text-align: center;
+      line-height: 1.2;
+      transition: all 0.3s ease;
+      box-shadow: 2px 2px 8px rgba(0,0,0,0.2);
+      writing-mode: vertical-lr;
+      text-orientation: mixed;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    }
+
+    /* 彩虹色彩 */
+    .bookmark:nth-child(1) {
+      background: linear-gradient(135deg, #ff6b6b, #ff5252);
+    }
+
+    .bookmark:nth-child(2) {
+      background: linear-gradient(135deg, #4ecdc4, #26a69a);
+    }
+
+    .bookmark:nth-child(3) {
+      background: linear-gradient(135deg, #45b7d1, #2196f3);
+    }
+
+    .bookmark:nth-child(4) {
+      background: linear-gradient(135deg, #96ceb4, #4caf50);
+    }
+
+    .bookmark:nth-child(5) {
+      background: linear-gradient(135deg, #ffeaa7, #fdcb6e);
+    }
+
+    .bookmark:nth-child(6) {
+      background: linear-gradient(135deg, #dda0dd, #9c27b0);
+    }
+
+    .bookmark.active {
+      transform: translateX(-10px);
+      box-shadow: 2px 2px 15px rgba(0,0,0,0.3);
+      filter: brightness(1.1) saturate(1.2);
+    }
+
+    .bookmark:hover {
+      transform: translateX(-5px);
+      box-shadow: 2px 2px 12px rgba(0,0,0,0.25);
+      filter: brightness(1.05);
+    }
+
+    .book-content {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      opacity: 0;
+      transition: opacity 0.5s ease 1s;
+    }
+
+    .book-content.visible {
+      opacity: 1;
+    }
+
+    .page {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      padding: 30px;
+      background: #fefefe;
+      opacity: 0;
+      transform: translateX(100%);
+      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .page.active {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .page.prev {
+      transform: translateX(-100%);
+    }
+
+    .page-title {
+      font-size: 24px;
+      font-weight: bold;
+      color: #2f4f2f;
+      margin-bottom: 20px;
+      text-align: center;
+      border-bottom: 2px solid #88c999;
+      padding-bottom: 10px;
+    }
+
+    .page-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
     }
 
     textarea, input {
       width: 100%;
-      padding: 10px;
-      margin: 6px 0;
-      border: none;
+      padding: 15px;
+      border: 2px solid #e0e0e0;
       border-radius: 8px;
-      background-color: rgba(255, 255, 255, 0.85);
-      resize: vertical;
+      background: rgba(255, 255, 255, 0.9);
       font-size: 16px;
-      min-height: 120px;
+      font-family: inherit;
+      color: #2f4f2f;
+      resize: vertical;
+      transition: border-color 0.3s ease;
+    }
+
+    textarea {
+      min-height: 150px;
+      flex: 1;
     }
 
     input {
-      min-height: 42px;
+      min-height: 50px;
     }
 
-    button {
-      margin-top: auto;
-      padding: 12px;
-      width: 100%;
-      background-color: #88c999;
+    textarea:focus, input:focus {
+      outline: none;
+      border-color: #88c999;
+      box-shadow: 0 0 0 3px rgba(136, 201, 153, 0.1);
+    }
+
+    .export-btn {
+      margin-top: 20px;
+      padding: 15px 30px;
+      background: linear-gradient(135deg, #88c999, #66b377);
       color: white;
       font-weight: bold;
       border: none;
       border-radius: 8px;
       font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(136, 201, 153, 0.3);
+    }
+
+    .export-btn:hover {
+      background: linear-gradient(135deg, #66b377, #4caf50);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(136, 201, 153, 0.4);
+    }
+
+    .page-number {
+      position: absolute;
+      bottom: 15px;
+      right: 30px;
+      font-size: 14px;
+      color: #888;
+      font-style: italic;
+    }
+
+    .autosave-indicator {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(136, 201, 153, 0.9);
+      color: white;
+      padding: 8px 15px;
+      border-radius: 20px;
+      font-size: 14px;
+      opacity: 0;
+      transform: translateY(-20px);
+      transition: all 0.3s ease;
+      z-index: 100;
+    }
+
+    .autosave-indicator.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* 移动设备优化 */
+    @media (max-width: 768px) {
+      .book-container {
+        padding: 10px;
+      }
+
+      .book {
+        width: 95vw;
+        height: 90vh;
+      }
+
+      .cover-title {
+        font-size: 28px;
+      }
+
+      .cover-subtitle {
+        font-size: 16px;
+      }
+
+      .cover-icon {
+        font-size: 60px;
+      }
+
+      .bookmarks {
+        right: -20px;
+        top: 30px;
+      }
+
+      .bookmark {
+        width: 40px;
+        height: 60px;
+        font-size: 10px;
+      }
+
+      .page {
+        padding: 20px;
+      }
+
+      .page-title {
+        font-size: 20px;
+      }
+
+      textarea, input {
+        padding: 12px;
+        font-size: 16px;
+      }
+
+      textarea {
+        min-height: 120px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .book {
+        width: 100vw;
+        height: 100vh;
+        border-radius: 0;
+      }
+
+      .book-cover {
+        border-radius: 0;
+      }
+
+      .cover-title {
+        font-size: 24px;
+      }
+
+      .cover-subtitle {
+        font-size: 14px;
+      }
+
+      .cover-icon {
+        font-size: 50px;
+      }
+
+      .bookmarks {
+        right: -15px;
+        top: 20px;
+      }
+
+      .bookmark {
+        width: 35px;
+        height: 50px;
+        font-size: 9px;
+      }
+
+      .page {
+        padding: 15px;
+      }
+
+      .page-title {
+        font-size: 18px;
+        margin-bottom: 15px;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="tab-bar">
-      <div class="tab active" onclick="switchTab('outline')">大纲</div>
-      <div class="tab" onclick="switchTab('writing')">码字</div>
-      <div class="tab" onclick="switchTab('character')">人设</div>
-      <div class="tab" onclick="switchTab('structure')">章节</div>
-    </div>
+  <div class="book-container">
+    <div class="book">
+      <div class="book-spine"></div>
+      
+      <!-- 封面 -->
+      <div class="book-cover" onclick="openBook()">
+        <div class="cover-decoration"></div>
+        <div class="cover-content">
+          <div class="cover-icon">🍃</div>
+          <div class="cover-title">抹茶写作助手</div>
+          <div class="cover-subtitle">你的创意伙伴</div>
+        </div>
+        <div class="cover-hint">点击翻开 →</div>
+      </div>
+      
+      <div class="bookmarks">
+        <div class="bookmark active" onclick="switchPage('outline')">大纲</div>
+        <div class="bookmark" onclick="switchPage('writing')">码字</div>
+        <div class="bookmark" onclick="switchPage('character')">人设</div>
+        <div class="bookmark" onclick="switchPage('structure')">章节</div>
+      </div>
 
-    <div class="panel active" id="outline">
-      <textarea id="outlineText" placeholder="在这里填写你的世界观、设定和故事大纲……" oninput="autosave()"></textarea>
-    </div>
+      <div class="book-content">
+        <div class="page active" id="outline">
+          <div class="page-title">故事大纲</div>
+          <div class="page-content">
+            <textarea id="outlineText" placeholder="在这里填写你的世界观、设定和故事大纲……&#10;&#10;• 世界观设定&#10;• 主要情节线&#10;• 关键转折点&#10;• 结局构思" oninput="autosave()"></textarea>
+          </div>
+          <div class="page-number">第 1 页</div>
+        </div>
 
-    <div class="panel" id="writing">
-      <textarea id="mainText" placeholder="开始码字吧！" oninput="autosave()"></textarea>
-      <button onclick="exportText()">导出文本</button>
-    </div>
+        <div class="page" id="writing">
+          <div class="page-title">正文创作</div>
+          <div class="page-content">
+            <textarea id="mainText" placeholder="开始码字吧！在这里尽情发挥你的创意……" oninput="autosave()"></textarea>
+            <button class="export-btn" onclick="exportText()">📝 导出文本</button>
+          </div>
+          <div class="page-number">第 2 页</div>
+        </div>
 
-    <div class="panel" id="character">
-      <textarea id="characterText" placeholder="填写角色设定，比如姓名、性格、背景等……" oninput="autosave()"></textarea>
-    </div>
+        <div class="page" id="character">
+          <div class="page-title">角色设定</div>
+          <div class="page-content">
+            <textarea id="characterText" placeholder="填写角色设定……&#10;&#10;角色姓名：&#10;年龄：&#10;性格特点：&#10;外貌描述：&#10;背景故事：&#10;能力特长：&#10;人物关系：" oninput="autosave()"></textarea>
+          </div>
+          <div class="page-number">第 3 页</div>
+        </div>
 
-    <div class="panel" id="structure">
-      <input id="volumeName" placeholder="卷名，如：第一卷 命运之始" oninput="autosave()" />
-      <input id="chapterName" placeholder="章节名，如：第1章 初遇" oninput="autosave()" />
+        <div class="page" id="structure">
+          <div class="page-title">章节结构</div>
+          <div class="page-content">
+            <input id="volumeName" placeholder="卷名，如：第一卷 命运之始" oninput="autosave()" />
+            <input id="chapterName" placeholder="章节名，如：第1章 初遇" oninput="autosave()" />
+            <textarea id="chapterNotes" placeholder="章节备注和大纲……&#10;&#10;• 本章主要情节&#10;• 重要对话&#10;• 场景描述&#10;• 伏笔设置" oninput="autosave()"></textarea>
+          </div>
+          <div class="page-number">第 4 页</div>
+        </div>
+      </div>
     </div>
   </div>
 
+  <div class="autosave-indicator" id="autosaveIndicator">
+    ✓ 已自动保存
+  </div>
+
   <script>
-    function switchTab(tabId) {
-      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'))
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'))
-      document.getElementById(tabId).classList.add('active')
-      event.target.classList.add('active')
+    let currentPage = 'outline';
+    let autosaveTimeout;
+    let bookOpened = false;
+
+    function openBook() {
+      if (bookOpened) return;
+      
+      bookOpened = true;
+      const cover = document.querySelector('.book-cover');
+      const bookContent = document.querySelector('.book-content');
+      const bookmarks = document.querySelector('.bookmarks');
+      
+      cover.classList.add('opened');
+      
+      // 延时显示内容和书签
+      setTimeout(() => {
+        bookContent.classList.add('visible');
+        bookmarks.classList.add('visible');
+      }, 800);
+    }
+
+    function switchPage(pageId) {
+      if (currentPage === pageId || !bookOpened) return;
+
+      // 更新书签状态
+      document.querySelectorAll('.bookmark').forEach(bookmark => {
+        bookmark.classList.remove('active');
+      });
+      event.target.classList.add('active');
+
+      // 页面切换动画
+      const currentPageEl = document.getElementById(currentPage);
+      const newPageEl = document.getElementById(pageId);
+
+      currentPageEl.classList.add('prev');
+      setTimeout(() => {
+        currentPageEl.classList.remove('active', 'prev');
+        newPageEl.classList.add('active');
+      }, 250);
+
+      currentPage = pageId;
     }
 
     function autosave() {
-      localStorage.setItem('outlineText', document.getElementById('outlineText').value)
-      localStorage.setItem('mainText', document.getElementById('mainText').value)
-      localStorage.setItem('characterText', document.getElementById('characterText').value)
-      localStorage.setItem('volumeName', document.getElementById('volumeName').value)
-      localStorage.setItem('chapterName', document.getElementById('chapterName').value)
+      // 清除之前的定时器
+      clearTimeout(autosaveTimeout);
+      
+      // 延迟保存，避免频繁操作
+      autosaveTimeout = setTimeout(() => {
+        const data = {
+          outlineText: document.getElementById('outlineText').value,
+          mainText: document.getElementById('mainText').value,
+          characterText: document.getElementById('characterText').value,
+          volumeName: document.getElementById('volumeName').value,
+          chapterName: document.getElementById('chapterName').value,
+          chapterNotes: document.getElementById('chapterNotes').value
+        };
+
+        // 使用内存存储替代localStorage
+        window.writingData = data;
+        
+        // 显示保存提示
+        showAutosaveIndicator();
+      }, 1000);
+    }
+
+    function showAutosaveIndicator() {
+      const indicator = document.getElementById('autosaveIndicator');
+      indicator.classList.add('show');
+      setTimeout(() => {
+        indicator.classList.remove('show');
+      }, 2000);
     }
 
     function restore() {
-      document.getElementById('outlineText').value = localStorage.getItem('outlineText') || ''
-      document.getElementById('mainText').value = localStorage.getItem('mainText') || ''
-      document.getElementById('characterText').value = localStorage.getItem('characterText') || ''
-      document.getElementById('volumeName').value = localStorage.getItem('volumeName') || ''
-      document.getElementById('chapterName').value = localStorage.getItem('chapterName') || ''
+      // 从内存中恢复数据
+      if (window.writingData) {
+        const data = window.writingData;
+        document.getElementById('outlineText').value = data.outlineText || '';
+        document.getElementById('mainText').value = data.mainText || '';
+        document.getElementById('characterText').value = data.characterText || '';
+        document.getElementById('volumeName').value = data.volumeName || '';
+        document.getElementById('chapterName').value = data.chapterName || '';
+        document.getElementById('chapterNotes').value = data.chapterNotes || '';
+      }
     }
 
     function exportText() {
-      const volume = document.getElementById('volumeName').value || '未命名卷'
-      const chapter = document.getElementById('chapterName').value || '未命名章节'
-      const content = `【卷名】${volume}\n【章节】${chapter}\n\n${document.getElementById('mainText').value}`
-      const blob = new Blob([content], {type: "text/plain"})
-      const link = document.createElement("a")
-      link.download = `${volume}_${chapter}.txt`
-      link.href = URL.createObjectURL(blob)
-      link.click()
+      const volume = document.getElementById('volumeName').value || '未命名卷';
+      const chapter = document.getElementById('chapterName').value || '未命名章节';
+      const outline = document.getElementById('outlineText').value;
+      const characters = document.getElementById('characterText').value;
+      const notes = document.getElementById('chapterNotes').value;
+      const content = document.getElementById('mainText').value;
+
+      let exportContent = `【${volume}】\n【${chapter}】\n\n`;
+      
+      if (outline) {
+        exportContent += `=== 故事大纲 ===\n${outline}\n\n`;
+      }
+      
+      if (characters) {
+        exportContent += `=== 角色设定 ===\n${characters}\n\n`;
+      }
+      
+      if (notes) {
+        exportContent += `=== 章节备注 ===\n${notes}\n\n`;
+      }
+      
+      exportContent += `=== 正文内容 ===\n${content}`;
+
+      const blob = new Blob([exportContent], {type: "text/plain;charset=utf-8"});
+      const link = document.createElement("a");
+      link.download = `${volume}_${chapter}.txt`;
+      link.href = URL.createObjectURL(blob);
+      link.click();
+      URL.revokeObjectURL(link.href);
     }
 
-    restore()
+    // 初始化
+    restore();
+
+    // 添加键盘快捷键
+    document.addEventListener('keydown', (e) => {
+      if (!bookOpened) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          openBook();
+        }
+        return;
+      }
+      
+      if (e.ctrlKey || e.metaKey) {
+        switch(e.key) {
+          case '1':
+            e.preventDefault();
+            document.querySelector('.bookmark:nth-child(1)').click();
+            break;
+          case '2':
+            e.preventDefault();
+            document.querySelector('.bookmark:nth-child(2)').click();
+            break;
+          case '3':
+            e.preventDefault();
+            document.querySelector('.bookmark:nth-child(3)').click();
+            break;
+          case '4':
+            e.preventDefault();
+            document.querySelector('.bookmark:nth-child(4)').click();
+            break;
+          case 's':
+            e.preventDefault();
+            autosave();
+            break;
+        }
+      }
+    });
+
+    // 添加触摸支持
+    let touchStartX = 0;
+    let touchStartY = 0;
+
+    document.addEventListener('touchstart', (e) => {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+    });
+
+    document.addEventListener('touchend', (e) => {
+      if (!bookOpened) return;
+      
+      const touchEndX = e.changedTouches[0].clientX;
+      const touchEndY = e.changedTouches[0].clientY;
+      const deltaX = touchEndX - touchStartX;
+      const deltaY = touchEndY - touchStartY;
+
+      // 只有在水平滑动距离大于垂直滑动距离时才切换页面
+      if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 50) {
+        const pages = ['outline', 'writing', 'character', 'structure'];
+        const currentIndex = pages.indexOf(currentPage);
+        
+        if (deltaX > 0 && currentIndex > 0) {
+          // 右滑，切换到上一页
+          const prevPage = pages[currentIndex - 1];
+          document.querySelectorAll('.bookmark').forEach((bookmark, index) => {
+            bookmark.classList.remove('active');
+            if (pages[index] === prevPage) {
+              bookmark.classList.add('active');
+            }
+          });
+          switchPageDirect(prevPage);
+        } else if (deltaX < 0 && currentIndex < pages.length - 1) {
+          // 左滑，切换到下一页
+          const nextPage = pages[currentIndex + 1];
+          document.querySelectorAll('.bookmark').forEach((bookmark, index) => {
+            bookmark.classList.remove('active');
+            if (pages[index] === nextPage) {
+              bookmark.classList.add('active');
+            }
+          });
+          switchPageDirect(nextPage);
+        }
+      }
+    });
+
+    // 直接切换页面函数，用于触摸滑动
+    function switchPageDirect(pageId) {
+      if (currentPage === pageId || !bookOpened) return;
+
+      // 页面切换动画
+      const currentPageEl = document.getElementById(currentPage);
+      const newPageEl = document.getElementById(pageId);
+
+      currentPageEl.classList.add('prev');
+      setTimeout(() => {
+        currentPageEl.classList.remove('active', 'prev');
+        newPageEl.classList.add('active');
+      }, 250);
+
+      currentPage = pageId;
+    }
   </script>
 </body>
 </html>
